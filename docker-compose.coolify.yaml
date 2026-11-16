@@ -69,8 +69,6 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=ollama:11434
-    volumes:
-      - ./ollama:/modelfiles:ro
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -78,7 +76,24 @@ services:
         ollama pull gpt-oss:20b
         ollama pull hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M
         ollama pull hf.co/arunmcops/Param2-17B-A2.4B-Thinking-GGUF:Q4_K_M
-        ollama create param2-17b -f /modelfiles/Param2.Modelfile
+        # Same text as ollama/Param2.Modelfile (Coolify does not mount repo folders).
+        cat > /tmp/Param2.Modelfile <<'MODELFILE'
+        FROM hf.co/arunmcops/Param2-17B-A2.4B-Thinking-GGUF:Q4_K_M
+        TEMPLATE """{{- if .System }}<|im_start|>system
+        {{ .System }}<<|EOS|>>
+        {{ end }}{{- range .Messages }}<|im_start|>{{ .Role }}
+        {{ .Content }}<<|EOS|>>
+        {{ end }}<|im_start|>assistant
+        <think>
+
+        </think>
+
+        """
+        PARAMETER stop "<<|EOS|>>"
+        PARAMETER stop "<|im_start|>"
+        PARAMETER temperature 0.6
+        MODELFILE
+        ollama create param2-17b -f /tmp/Param2.Modelfile
         ollama run param2-17b "ok" > /dev/null
         echo models ready
 
