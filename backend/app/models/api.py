@@ -32,7 +32,28 @@ LLM_KEY_BY_PROVIDER = {
     "Cerebras": "cerebras_api_key",
     "OpenRouter": "openrouter_api_key",
     "Baseten": "baseten_api_key",
+    # Sarvam's OpenAI-compatible chat API takes the same key as its Bulbul voices.
+    "Sarvam": "sarvam_api_key",
 }
+
+# Models served on this machine (Ollama). No key: the endpoint is on a private Docker
+# network only. Offered when LOCAL_LLM_ENABLED is set, so an install without the local
+# service never lists a provider that cannot answer.
+LOCAL_PROVIDER = "Local (free)"
+LOCAL_PLACEHOLDER_KEY = "local"
+
+
+def local_llm_enabled() -> bool:
+    import os
+    return os.environ.get("LOCAL_LLM_ENABLED", "").strip().lower() in ("1", "true", "yes")
+
+
+def llm_provider_names() -> list[str]:
+    """Every language model provider that can be offered now."""
+    names = list(LLM_KEY_BY_PROVIDER)
+    if local_llm_enabled():
+        names.append(LOCAL_PROVIDER)
+    return names
 
 
 class APIProvider(Base):
@@ -135,12 +156,14 @@ class APISettings(Base):
 
     def get_provider_key(self, provider_name: str) -> str | None:
         """The LLM key for a provider name."""
+        if provider_name == LOCAL_PROVIDER:
+            return LOCAL_PLACEHOLDER_KEY if local_llm_enabled() else None
         column = LLM_KEY_BY_PROVIDER.get(provider_name)
         return self.get_key(column) if column else None
 
     def has_llm_key(self) -> bool:
         """At least one language model provider has a readable key."""
-        return any(self.get_key(c) for c in LLM_KEY_BY_PROVIDER.values())
+        return local_llm_enabled() or any(self.get_key(c) for c in LLM_KEY_BY_PROVIDER.values())
 
     def has_required_keys(self) -> bool:
         """fal for media plus at least one LLM provider."""

@@ -18,11 +18,17 @@ from sqlalchemy.orm import Session
 from app.models.api import AIModel, APIProvider, APISettings
 from app.utils import secret_box
 
+from app.services.extra_models import EXTRA_MODELS
+
 logger = logging.getLogger(__name__)
 
-PROVIDERS = ("OpenAI", "Anthropic", "Google Gemini", "Groq", "xAI", "Cerebras", "OpenRouter", "Baseten", "FAL")
+PROVIDERS = ("OpenAI", "Anthropic", "Google Gemini", "Groq", "xAI", "Cerebras", "OpenRouter", "Baseten", "Sarvam", "Local (free)", "FAL")
 # OpenAI-compatible providers need their endpoint; the rest use the vendor default.
-PROVIDER_BASE_URLS = {"Baseten": "https://inference.baseten.co/v1"}
+PROVIDER_BASE_URLS = {
+    "Baseten": "https://inference.baseten.co/v1",
+    "Sarvam": "https://api.sarvam.ai/v2",
+    "Local (free)": "http://ollama:11434/v1",
+}
 
 DEFAULT_MODEL = ("Anthropic", "claude-opus-5-5")
 # On a different provider from the default, so one outage does not take out both.
@@ -101,6 +107,8 @@ DEFAULT_MODELS = [
     {"name": "zai-org/GLM-4.7", "display_name": "GLM 4.7 (Baseten)", "provider": "Baseten", "description": "Previous GLM generation", "sort_order": 7},
     {"name": "deepseek-ai/DeepSeek-V4-Pro", "display_name": "DeepSeek V4 Pro (Baseten)", "provider": "Baseten", "description": "DeepSeek V4 Pro", "sort_order": 8},
     {"name": "openai/gpt-oss-120b", "display_name": "GPT-OSS 120B (Baseten)", "provider": "Baseten", "description": "OpenAI open-weight 120B on Baseten", "sort_order": 9},
+] + [
+    {**row, "sort_order": i} for i, row in enumerate(EXTRA_MODELS, 1)
 ]
 
 

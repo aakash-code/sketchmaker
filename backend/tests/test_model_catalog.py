@@ -135,7 +135,7 @@ def test_each_provider_gets_its_key_in_a_header_and_never_in_the_url(providers):
         assert any("secret-key-value" in value for value in request.headers.values())
     hosts = {r.url.host for r in fake.requests}
     assert hosts == {"api.openai.com", "api.anthropic.com", "generativelanguage.googleapis.com", "api.groq.com",
-                     "api.x.ai", "api.cerebras.ai", "openrouter.ai", "inference.baseten.co"}
+                     "api.x.ai", "api.cerebras.ai", "openrouter.ai", "inference.baseten.co", "api.sarvam.ai", "ollama"}
 
 
 @pytest.mark.parametrize("code", [400, 401, 403])

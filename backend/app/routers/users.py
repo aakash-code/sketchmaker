@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from app.dependencies import CurrentUser, DbSession, get_password_hash, set_session_cookie, verify_password
 from app.middleware.rate_limiter import AUTH_LIMIT, limiter
-from app.models.api import LLM_KEY_BY_PROVIDER, AIModel, APIProvider, APISettings
+from app.models.api import LLM_KEY_BY_PROVIDER, LOCAL_PROVIDER, local_llm_enabled, AIModel, APIProvider, APISettings
 from app.schemas.auth import ChangePasswordRequest
 from app.schemas.common import MessageResponse
 from app.schemas.user import UserProfileResponse, UserUpdate
@@ -76,6 +76,8 @@ def get_available_providers(_user: CurrentUser, db: DbSession):
         return []
 
     configured = [name for name, column in LLM_KEY_BY_PROVIDER.items() if api_settings.has_key(column)]
+    if local_llm_enabled():
+        configured.append(LOCAL_PROVIDER)
     if not configured:
         return []
 

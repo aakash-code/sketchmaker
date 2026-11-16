@@ -223,6 +223,8 @@ SOURCES: dict[str, _Source] = {
     "Cerebras": _Source("https://api.cerebras.ai/v1/models", _bearer, _openai_style),
     "OpenRouter": _Source("https://openrouter.ai/api/v1/models", _bearer, _openrouter),
     "Baseten": _Source("https://inference.baseten.co/v1/models", _bearer, _openai_style),
+    "Sarvam": _Source("https://api.sarvam.ai/v2/models", _bearer, _openai_style),
+    "Local (free)": _Source("http://ollama:11434/v1/models", _bearer, _openai_style),
 }
 
 

@@ -42,7 +42,7 @@ const PROVIDER_CONFIG = [
   { key: 'openrouter', name: 'OpenRouter', description: 'Multiple providers' },
   { key: 'baseten', name: 'Baseten', description: 'Kimi K3, GLM 5.2 (OpenAI-compatible)' },
   { key: 'fal', name: 'FAL', description: 'Image generation' },
-  { key: 'sarvam', name: 'Sarvam AI', description: 'Bulbul v4 voices for Indian languages (Lip Sync, My Assets)' },
+  { key: 'sarvam', name: 'Sarvam AI', description: 'Bulbul v4 voices, and Sarvam 105B language models for Indian languages' },
 ];
 
 const modelName = (model: { display_name: string | null; name: string }) => model.display_name || model.name;

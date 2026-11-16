@@ -32,12 +32,16 @@ PROVIDER_PREFIXES = {
     # OpenAI-compatible endpoints route through LiteLLM's openai/ path and
     # supply their own api_base, taken from the provider row.
     "Baseten": "openai/",
+    "Sarvam": "openai/",
+    "Local (free)": "openai/",
 }
 
 # Providers whose endpoint lives somewhere other than the vendor default. The
 # address is stored on the provider row by the seed.
 OPENAI_COMPATIBLE_DEFAULTS = {
     "Baseten": "https://inference.baseten.co/v1",
+    "Sarvam": "https://api.sarvam.ai/v2",
+    "Local (free)": "http://ollama:11434/v1",
 }
 
 

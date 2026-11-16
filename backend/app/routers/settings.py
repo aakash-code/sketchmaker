@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import CurrentUser, DbSession
 from app.middleware.rate_limiter import limiter
-from app.models.api import LLM_KEY_BY_PROVIDER, AIModel, APIProvider, APISettings
+from app.models.api import LLM_KEY_BY_PROVIDER, llm_provider_names, AIModel, APIProvider, APISettings
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.services import model_catalog
@@ -149,7 +149,7 @@ def _adopt_usable_default(db: Session, row: APISettings) -> None:
     provider = db.query(APIProvider).filter(APIProvider.id == row.default_provider_id).first()
     if provider is not None and row.get_provider_key(provider.name):
         return
-    for name in LLM_KEY_BY_PROVIDER:
+    for name in llm_provider_names():
         if not row.get_provider_key(name):
             continue
         model = (
@@ -243,7 +243,7 @@ def refresh_models(request: Request, _user: CurrentUser, db: DbSession):
     """Ask each provider with a key what it offers now. Adds nothing: the owner chooses."""
     row = db.query(APISettings).first()
     keys = {}
-    for name in LLM_KEY_BY_PROVIDER:
+    for name in llm_provider_names():
         key = row.get_provider_key(name) if row else None
         if key:
             keys[name] = key
@@ -274,7 +274,7 @@ def refresh_models(request: Request, _user: CurrentUser, db: DbSession):
 @router.post("/models/add-offered")
 def add_offered_models(payload: OfferedModelsAdd, _user: CurrentUser, db: DbSession):
     """Add what the owner ticked in Refresh models. A model already there is left as it is."""
-    allowed = {p.id for p in db.query(APIProvider).filter(APIProvider.name.in_(LLM_KEY_BY_PROVIDER)).all()}
+    allowed = {p.id for p in db.query(APIProvider).filter(APIProvider.name.in_(llm_provider_names())).all()}
     added = 0
     # Backwards, each going above the last, so the top of the list stays in the order shown.
     for item in reversed(payload.models):

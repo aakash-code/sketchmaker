@@ -1,6 +1,6 @@
 # Coolify deployment on the Oracle server (sketch.lighthour.in).
-# nginx on the host keeps 80/443 and the certificate, and forwards to 127.0.0.1:8100.
-# Port 8000 on that host is the Coolify panel, hence 8100.
+# nginx on the host keeps 80/443 and the certificate, and forwards to 127.0.0.1:8300.
+# On that host 8000 is the Coolify panel and 8100 is bhaktisagar, hence 8300.
 #
 # TRUSTED_PROXIES is "*" because the port is published on 127.0.0.1 only: the one thing
 # that can reach the app is nginx on the host, through Docker's gateway address, which
@@ -14,10 +14,12 @@ services:
     init: true
     stop_grace_period: 30s
     ports:
-      - "127.0.0.1:8100:8000"
+      - "127.0.0.1:8300:8000"
     environment:
       - TRUSTED_PROXIES=*
       - TZ=Asia/Kolkata
+      # Offers the "Local (free)" language models served by the ollama service below.
+      - LOCAL_LLM_ENABLED=1
     volumes:
       - sketchmaker-data:/data
       - sketchmaker-config:/config
@@ -35,6 +37,46 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Free open-weight language models on this server. Private: no port is published, only
+  # Sketchmaker reaches it, as http://ollama:11434 on this compose network. Capped at 2 of
+  # the 4 cores so OpenAlgo always keeps the other two, and one model in memory at a time.
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=-1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_NUM_PARALLEL=1
+    volumes:
+      - ollama-models:/root/.ollama
+    cpus: 2
+    mem_limit: 18g
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # Downloads the models once (about 27 GB) and loads the default one, then exits.
+  # A later deploy finds them already there and only checks for updates.
+  ollama-pull:
+    image: ollama/ollama:latest
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        ollama pull gpt-oss:20b &&
+        ollama pull hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M &&
+        ollama run gpt-oss:20b "ok" > /dev/null && echo models ready
+
 volumes:
+  ollama-models:
   sketchmaker-data:
   sketchmaker-config:

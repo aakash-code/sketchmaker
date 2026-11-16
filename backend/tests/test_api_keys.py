@@ -98,7 +98,7 @@ def test_seed_provides_providers_models_and_defaults(owner_client, seeded):
     assert body["default_provider_id"] != body["fallback_provider_id"]
     providers = owner_client.get("/api/settings/providers").json()
     models = owner_client.get("/api/settings/models").json()
-    assert len(providers) == 9 and len(models) == len(DEFAULT_MODELS)
+    assert len(providers) == 11 and len(models) == len(DEFAULT_MODELS)
     assert all("base_url" not in p for p in providers)
     opus = next(m for m in models if m["name"] == "claude-opus-5-5")
     assert opus["description"] and opus["id"] == body["default_model_id"]
