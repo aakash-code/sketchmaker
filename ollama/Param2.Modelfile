@@ -1,0 +1,19 @@
+# BharatGen Param2 17B (2.4B active), community GGUF build, for Ollama.
+# The GGUF's own chat template is not one Ollama can apply, so replies came back empty;
+# this is the model's format written out by hand, with thinking switched off (the empty
+# think block), which is what its own template does for enable_thinking=false.
+# Licence: BharatGen Research License, non-commercial research and academic use only.
+FROM hf.co/arunmcops/Param2-17B-A2.4B-Thinking-GGUF:Q4_K_M
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<<|EOS|>>
+{{ end }}{{- range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<<|EOS|>>
+{{ end }}<|im_start|>assistant
+<think>
+
+</think>
+
+"""
+PARAMETER stop "<<|EOS|>>"
+PARAMETER stop "<|im_start|>"
+PARAMETER temperature 0.6

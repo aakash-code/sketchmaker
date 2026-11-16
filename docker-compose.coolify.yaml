@@ -59,8 +59,8 @@ services:
       retries: 5
       start_period: 20s
 
-  # Downloads the models once (about 27 GB) and loads the default one, then exits.
-  # A later deploy finds them already there and only checks for updates.
+  # Downloads the models once (about 37 GB), builds the Param2 model from its Modelfile,
+  # and loads the default one, then exits. A later deploy only checks for updates.
   ollama-pull:
     image: ollama/ollama:latest
     restart: "no"
@@ -69,12 +69,18 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=ollama:11434
+    volumes:
+      - ./ollama:/modelfiles:ro
     entrypoint: ["/bin/sh", "-c"]
     command:
-      - >-
-        ollama pull gpt-oss:20b &&
-        ollama pull hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M &&
-        ollama run gpt-oss:20b "ok" > /dev/null && echo models ready
+      - |
+        set -e
+        ollama pull gpt-oss:20b
+        ollama pull hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M
+        ollama pull hf.co/arunmcops/Param2-17B-A2.4B-Thinking-GGUF:Q4_K_M
+        ollama create param2-17b -f /modelfiles/Param2.Modelfile
+        ollama run param2-17b "ok" > /dev/null
+        echo models ready
 
 volumes:
   ollama-models:

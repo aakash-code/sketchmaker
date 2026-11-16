@@ -18,6 +18,11 @@ EXTRA_MODELS = [
     {"name": "deepseekv4.1-flash-1017", "display_name": "DeepSeek V4.1 Flash (Sarvam)", "provider": "Sarvam",
      "description": "General chat", "context_window": 1000000},
     # Free, on this server. Slower than the hosted models: a few words a second.
+    # Param2 (BharatGen, Indian, 22 languages) first: about 6 words a second here, five
+    # times GPT-OSS, because only 2.4B of its 17B parameters work per word.
+    {"name": "param2-17b", "display_name": "BharatGen Param2 17B (free, on this server)", "provider": "Local (free)",
+     "description": "Indian open-weight model, 22 Indian languages, the fastest free model here. Non-commercial use only",
+     "context_window": 32000, "is_latest": True},
     {"name": "gpt-oss:20b", "display_name": "GPT-OSS 20B (free, on this server)", "provider": "Local (free)",
      "description": "OpenAI open-weight model, runs here at no cost", "context_window": 32000, "is_latest": True},
     {"name": "hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M", "display_name": "Sarvam-M (free, on this server)",
