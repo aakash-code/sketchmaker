@@ -1,0 +1,40 @@
+# Coolify deployment on the Oracle server (sketch.lighthour.in).
+# nginx on the host keeps 80/443 and the certificate, and forwards to 127.0.0.1:8100.
+# Port 8000 on that host is the Coolify panel, hence 8100.
+#
+# TRUSTED_PROXIES is "*" because the port is published on 127.0.0.1 only: the one thing
+# that can reach the app is nginx on the host, through Docker's gateway address, which
+# differs per network. nginx answers only for sketch.lighthour.in.
+name: sketchmaker
+
+services:
+  sketchmaker:
+    build: .
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:8100:8000"
+    environment:
+      - TRUSTED_PROXIES=*
+      - TZ=Asia/Kolkata
+    volumes:
+      - sketchmaker-data:/data
+      - sketchmaker-config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=1g,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 1024
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  sketchmaker-data:
+  sketchmaker-config:
