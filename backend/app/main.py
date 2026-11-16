@@ -76,6 +76,11 @@ def _prepare_database() -> None:
 
         row = db.query(APISettings).first()
         if row is not None:
+            # A default on a provider with no key fails every language model feature.
+            # Move it to one that can answer (with no paid key, the free local model).
+            from app.routers.settings import _adopt_usable_default
+            _adopt_usable_default(db, row)
+            db.commit()
             if secret_box.canary_status(row.secrets_canary) == "unreadable":
                 logger.error(
                     "The stored API keys were encrypted with a different SECRET_KEY or ENCRYPTION_SALT and "

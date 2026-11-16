@@ -168,6 +168,10 @@ def resolve_fallback_model(db: Session, exclude: tuple[str, str] | None = None):
     if exclude and (model.name, provider.name) == exclude:
         return None
 
+    # A backup with no key would only turn one failure into a second, slower one.
+    if not settings.get_provider_key(provider.name):
+        return None
+
     return model.name, provider.name
 
 

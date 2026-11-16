@@ -59,7 +59,7 @@ services:
       retries: 5
       start_period: 20s
 
-  # Downloads the models once (about 37 GB), builds the Param2 model from its Modelfile,
+  # Downloads the model once (about 10 GB), builds the Param2 model from its Modelfile,
   # and loads the default one, then exits. A later deploy only checks for updates.
   ollama-pull:
     image: ollama/ollama:latest
@@ -73,8 +73,6 @@ services:
     command:
       - |
         set -e
-        ollama pull gpt-oss:20b
-        ollama pull hf.co/bartowski/sarvamai_sarvam-m-GGUF:Q4_K_M
         ollama pull hf.co/arunmcops/Param2-17B-A2.4B-Thinking-GGUF:Q4_K_M
         # Same text as ollama/Param2.Modelfile (Coolify does not mount repo folders).
         cat > /tmp/Param2.Modelfile <<'MODELFILE'
